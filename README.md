@@ -2,9 +2,13 @@
 *“The mind is not a vessel to be filled, but a flame to be lit” Lucius Mestrius Plutarchus*\
 
 ## Abstract
-This article critiques modern Large Language Models (LLMs) from an engineering perspective, highlighting key limitations such as token prediction without genuine comprehension, lack of influence over learning processes, absence of a structured concept of "thought," and insufficient separation between knowledge and facts. The author argues that current monolithic transformer-based architectures are inefficient and proposes a modular, hierarchical approach to designing a thinking machine.
+This article critiques modern Large Language Models (LLMs) from an engineering perspective, identifying key limitations such as token-based prediction without true comprehension, lack of thought representation, and inefficiencies in scaling and training. The author proposes a modular, hierarchical architecture to address these shortcomings. The approach involves:
+-	Token-to-Thought Embeddings – Breaking text into thought units (e.g., sentences) and encoding them into compact embeddings via convolutional transformers, enabling semantic understanding beyond token sequences.
+-	Thought Prediction – Training models to predict next thoughts (not tokens) using context-aware transformers, simulating reasoning without token constraints.
+-	Specialized Model Ecosystem – Deploying interconnected models (e.g., fact storage, expert domains, supervisory control) to optimize memory, accuracy, and adaptability. The Supervisor LLM orchestrates task delegation, combining factual recall (Big/Fresh LLMs) and expert analysis (Expert LLMs).
 
-The proposed solution involves breaking down the system into specialized components: (1) a token-to-embedding converter for linguistic understanding, (2) a convolutional LLM to distill token embeddings into "thought embeddings," and (3) a predictive model that simulates reasoning by forecasting subsequent thoughts rather than tokens. This architecture aims to enable abstract, language-independent thinking while incorporating short-term memory and scalable reasoning. The author emphasizes experimental validation through a "Basic Model" and advocates for specialized, interconnected neural networks over universal monolithic designs to achieve efficient, interpretable, and scalable artificial intelligence.
+This framework aims to decouple knowledge from facts, enable scalable reasoning, and reduce computational costs while improving interpretability. Future work will explore emergent model communication and training protocols.
+
 
 ## 1.	What's wrong with modern LLMs
 Perhaps the human brain has a homogeneous unified structure and it works, we know that it can think. But this is definitely not the result of the design of a higher intelligence, it just happened that way. Perhaps due to its universality, evolutionary development and growth from literally one cell with a limited set of genes, it is simply impossible to obtain another result. Perhaps an attempt to build AI on a homogeneous unified structure of transformers will also bring the long-awaited result. If you try long enough, something will work out. But unlike the human brain, we design what the neural network will look like ourselves and we do it consciously. We do not necessarily pile up hundreds of billions of neurons in the form of many transformers and train it all on trillions and trillions of tokens. Not necessarily even if it works as a result. We, as engineers, can try to make it simpler, faster, more accurate, cheaper. To do it without interfering much with the internal structure of the neural network itself. Let there be transformers if they are the best that exists at the moment.
@@ -95,5 +99,32 @@ A sequential set of embeddings of predicted thoughts performs the function of sh
 
 ### 2.7.	Basic model
 Without experimental verification, it is impossible to know whether the above-described idea of a thinking model will work in principle and, if so, whether it will achieve the required accuracy. To evaluate, you do not need to train the model on the entire available corpus of texts. You can and should try to use the method proposed in another article - https://github.com/loftyara/LLMagogy We will call the resulting model the Basic Model. Just as the engineering approach encourages us to divide a large neural network into several networks/subsystems, it also tells us not to make one universal neural network. In this world, everything universal is imperfect - too big, slow, expensive, inaccurate. The best result is obtained by combining various specialized solutions, while built on common foundations and platforms. This is the function that the resulting basic model will perform.
+
+## 3.	Set of models
+So, we have a basic compact model trained on a limited text corpus. We will train many follower models on its basis. We will fix and will not change that part of the neural network, those parameters that are responsible for converting tokens into embeddings and vice versa. We need different LLMs to be able to communicate with each other somehow. The ideal option would be to exchange thought embeddings, but the author, due to insufficient education and intellectual abilities, does not yet see how this could be done. The option of communicating using tokens is always possible, but let's try to make at least token embeddings the language of communication, suddenly we will see our own language of neural networks, obtained implicitly during the training process. The maximum context size will also remain unchanged, otherwise we will face incompatibility of models.
+
+LLMs are characterized by the size of the embedding vectors (thought embeddings in our case) and the number of transformer layers inside model. LLM derivatives of the base model will have larger values of these parameters. We should try to train the base model without redundancy, and therefore, in order to put new data and connections there, we will need to increase the size of the model. Increasing the size of the embedding vector expands the space of meanings and allows the model to remember more information. The larger the vector size, the more the model can remember. Increasing the number of transformer layers is more likely associated with connections between tokens, thoughts, and embeddings. The more layers, the more complex dependencies and connections they can find, the more complex thoughts they can think.
+
+### 3.1.	The Big LLM - model with facts
+The first model to be trained is a large LLM, similar to the currently existing LLM. A huge text corpus will be used for training. The embedding vector sizes will need to be significantly increased. But the number of layers does not need to be significantly increased, this model does not need to be smart, it needs to remember, learn facts.
+
+### 3.2.	Fresh LLM - a model with fresh facts
+Now, at the beginning of 2025, some advanced models are trained on texts collected before 2023. That is, LLM is lagging behind by a year and a half. This is due to the duration and cost of training the model. Perhaps this is an inevitable consequence of the transformer architecture. To overcome the limitation of data staleness, in addition to the large model, an additional similar model will be required that knows only about recent events, texts, discoveries.
+
+### 3.3.	Expert LLMs - specialized models
+Small expert models, slightly different from the basic model in the size of the embedding vector, but having a larger number of layers. The task of these models is to understand, to be an expert in a certain area of human activity. For example, to know some science or combination of sciences, to know certain technologies, production, etc.
+
+### 3.4.	General LLMs  - models for models
+These are specialized models, but intended rather for others, primarily expert LLMs, and not for humans. An example of such a model is a computational model that generates code that performs certain calculations, which allows combining, connecting together both thinking and classical computer calculations.
+
+### 3.5.	Supervisor LLM – management model
+The last and most important family of models in a single copy. This is the most complex model, it must simultaneously know a lot and think deeply. An analogue of this in the world of people can be a human encyclopedist, a universal thinker, such as Leonardo da Vinci. It is this model that interacts with a human - accepts questions and tasks from him and gives answers and solutions.
+
+To generate such answers (if necessary), the model calls on the Big and Fresh LLM for facts and/or calls on expert LLMs. It decides which LLMs to use, when to stop generating an answer, which answers to prefer, and how to form the final result. This model is also responsible for the interaction of different LLMs with each other during the request processing process, for dispatching their requests.
+
+### 3.6.	Scheme of interaction of models
+Tokens from the user are converted into embeddings and fed to the input of Supervisor LLM. The output of Supervisor LLM is converted back into tokens and is the answer to the task. Information exchange between models is performed using token embeddings. For diagnostics and understanding of the thinking process, these embeddings can be converted into tokens, but this is not required for the operation of the models themselves. Perhaps, in the process of training models, a model language based on token embeddings will appear, inheriting them, but which will no longer be convertible into tokens. How to train/learn such interaction of models will be described in the next chapter.
+
+<p align="center">Diagram 7. Interaction of models</p>
 
 *To be continued …*\
