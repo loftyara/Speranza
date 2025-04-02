@@ -127,4 +127,4 @@ Tokens from the user are converted into embeddings and fed to the input of Super
 
 <p align="center">Diagram 7. Interaction of models</p>
 
-*To be continued …*\
+*To be continued …*
