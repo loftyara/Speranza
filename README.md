@@ -2,13 +2,20 @@
 *“The mind is not a vessel to be filled, but a flame to be lit” Lucius Mestrius Plutarchus*\
 
 ## Abstract
-This article critiques modern Large Language Models (LLMs) from an engineering perspective, identifying key limitations such as token-based prediction without true comprehension, lack of thought representation, and inefficiencies in scaling and training. The author proposes a modular, hierarchical architecture to address these shortcomings. The approach involves:
--	Token-to-Thought Embeddings – Breaking text into thought units (e.g., sentences) and encoding them into compact embeddings via convolutional transformers, enabling semantic understanding beyond token sequences.
--	Thought Prediction – Training models to predict next thoughts (not tokens) using context-aware transformers, simulating reasoning without token constraints.
--	Specialized Model Ecosystem – Deploying interconnected models (e.g., fact storage, expert domains, supervisory control) to optimize memory, accuracy, and adaptability. The Supervisor LLM orchestrates task delegation, combining factual recall (Big/Fresh LLMs) and expert analysis (Expert LLMs).
+This article presents an engineering perspective on designing a Large Language Model (LLM) capable of genuine understanding and reasoning, rather than merely predicting tokens. The author critiques current LLMs for their limitations, including token-based prediction, lack of explicit thought representation, inability to separate knowledge from facts, absence of short-term memory, and inefficiency in scaling.
 
-This framework aims to decouple knowledge from facts, enable scalable reasoning, and reduce computational costs while improving interpretability. Future work will explore emergent model communication and training protocols.
+To address these issues, the author proposes a modular architecture where distinct neural networks handle different cognitive functions:
+-	Token-to-Embedding Conversion: A compact model trained to understand language structure.
+-	Thought Embeddings: A convolutional LLM condenses token sequences into "thought embeddings" to represent higher-level meaning.
+-	Thought Prediction: A reasoning model predicts subsequent thoughts, enabling iterative thinking without token constraints.
+-	Specialized Models: Fact-based, expert, and general-purpose LLMs work in tandem, orchestrated by a Supervisor LLM that manages interactions and ensures alignment.
 
+Key innovations include:
+-	Explicit thought representation via embeddings, decoupling reasoning from token generation.
+-	Modular scalability, allowing efficient specialization (e.g., facts vs. reasoning) and reducing monolithic training costs.
+-	Enhanced safety through the Supervisor LLM, which governs model collaboration and enforces alignment.
+
+This framework aims to move beyond statistical token prediction toward a system that emulates human-like understanding, reasoning, and adaptable learning. Future work involves experimental validation and refining model interactions.
 
 ## 1.	What's wrong with modern LLMs
 Perhaps the human brain has a homogeneous unified structure and it works, we know that it can think. But this is definitely not the result of the design of a higher intelligence, it just happened that way. Perhaps due to its universality, evolutionary development and growth from literally one cell with a limited set of genes, it is simply impossible to obtain another result. Perhaps an attempt to build AI on a homogeneous unified structure of transformers will also bring the long-awaited result. If you try long enough, something will work out. But unlike the human brain, we design what the neural network will look like ourselves and we do it consciously. We do not necessarily pile up hundreds of billions of neurons in the form of many transformers and train it all on trillions and trillions of tokens. Not necessarily even if it works as a result. We, as engineers, can try to make it simpler, faster, more accurate, cheaper. To do it without interfering much with the internal structure of the neural network itself. Let there be transformers if they are the best that exists at the moment.
@@ -126,5 +133,24 @@ To generate such answers (if necessary), the model calls on the Big and Fresh LL
 Tokens from the user are converted into embeddings and fed to the input of Supervisor LLM. The output of Supervisor LLM is converted back into tokens and is the answer to the task. Information exchange between models is performed using token embeddings. For diagnostics and understanding of the thinking process, these embeddings can be converted into tokens, but this is not required for the operation of the models themselves. Perhaps, in the process of training models, a model language based on token embeddings will appear, inheriting them, but which will no longer be convertible into tokens. How to train/learn such interaction of models will be described in the next chapter.
 
 <p align="center">Diagram 7. Interaction of models</p>
+
+## 4.	Supervisor LLM
+All LLMs except Supervisor do not require any non-standard or additional training. Their job is to understand the tokens they receive and generate an optimal response from their point of view, as if they were the only LLM and were giving the best response they could.
+
+The Supervisor LLM controls the interaction with users and between models. The LLM has a number of inputs/outputs equal to the number of LLMs used + 2. Input number 0 refers to interaction with the user. Output number 1 is for cases when the obtained result should not, maynot be reported because it violates the internal policy of the company owner of the LLM. Output number 1 is used for Alignment. Connection number 2 belongs to the Big LLM, connection number 3 belongs to the Fresh LLM and connection number 4 belongs to the Calculating LLM. Connections starting with number 5 are for existing expert and general models.
+
+Supervisor LLM accepts the text from the user, converts it into tokens and their embeddings, and then must decide to which of its outputs to send this array of embeddings. Perhaps it would be correct for Supervisor LLM to add some text from itself, but for now we will stop only at the output selection. We will introduce a rule that the output connection number should not coincide with the input connection number. We believe that other LLMs have already done what they could, got the best result, and there is no point in returning the same embeddings to them again. The called LLM processes the request and returns its own array of token embeddings. Supervisor LLM adds these embeddings to the previous ones and re-determines the next output. Thus, the process of generating a response looks like a sequential call to different LLMs with the accumulation of embeddings. The completion of Supervisor LLM is the selection of the next output with the number 0 or 1 or exceeding the maximum permissible number of iterations.
+
+If the next output is 0, it means that the LLM Supervisor thinks that the answer to the user is ready. The answer can be either the answer of the last LLM (the last few LLMs) or the entire thinking process. If the next output is 1, it means that the LLM Supervisor thinks that the answer is not allowed according to the LLM owner's policy and will give some standard text as an answer without explaining the reasons.
+
+### 4.1.	Security of this approach
+This division into several models with different purposes significantly increases the safety of neural networks and AI for humans and humanity. We do not have a single model that could become ASI. The Big LLM knows everything, but it is stupid, it just knows. Expert models can be very smart, but they know little and have a narrow specialization. A Supervisor LLM can be both smart and educated, but firstly, it is not necessary to make this model large, and secondly, all it can do is choose which model to call next.
+
+Output number 1 is a black hole. If the Supervisor LLM chooses it, there will be no result. At the same time, it is enough for such a choice to be made once in the process of generating an answer for the result not to be obtained. At any stage of thinking, the entire process will be blocked. Therefore, alignment is sufficient to apply only to the Supervisor LLM and there is no need to apply it to other models.
+
+## 5.	Training interaction of models
+All models except Supervisor LLM do not require special training. They simply receive an array of embeddings as input and create a resulting array of embeddings, i.e. they work as expected without additional training. Supervisor LLM will require additional layers that will select the correct output as in classification problems.
+
+At the first stage of training, you can limit yourself to automatic tagging of examples based on the area of knowledge the text belongs to and how complex it is. For more complex examples that require a certain sequence of calling models, manually tagged data will be required.
 
 *To be continued …*
