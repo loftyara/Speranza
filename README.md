@@ -67,11 +67,13 @@ Now texts consisting of words are converted into tokens. Then the tokens are fed
 
 We will do the same. All texts involved in training are fed to the tokenizer input and on the resulting tokens we will train the encoder and decoder simultaneously by predicting the next token. Both the encoder and decoder represent a sequence of transformers. At first glance, this is no different from the pre-training of a regular modern LLM. In terms of architecture, it is no different. But it differs in purpose and methods. We do not seek to teach knowledge or understanding of texts by predicting the next token. We only want to teach understanding of the language. We need a token-to-embedding converter. The size of such a neural network will be significantly smaller than the size of modern LLMs both in the number of transformer layers and in the size of the embedding vector. The corpus of texts will be insignificant, the most common simple books and basic textbooks are enough to understand the language, foreign language textbooks are especially well suited, because they are created for this very purpose - to explain how a foreign language works. It would be really good if all possible tokens were found there. There is no need to worry about the small text corpus used for training, about unclear patterns in the texts, about the knowledge not acquired. This is just the first stage, it is fast and inexpensive due to the limited text corpus and the small size of the neural network. We need to start somewhere, and a basic understanding of the text is enough for this. The specific characteristics of the encoder and decoder - the dimension of the embedding vector and the number of transformer layers - need to be determined experimentally.
 
+![](diagrams/diagram1.png)
 <p align="center">Diagram 1. Receiving token embeddings.</p>
 
 ### 2.2.	Highlighting a thought in the text
 What is a unit of thought in a text? A sentence? Several sentences? A paragraph? How to select a set of tokens/embeddings that make up a thought? In the most ideal case, the text should be broken down into thoughts by another person. But this option does not seem feasible. A good option would be to break the text into thoughts using another neural network. But if there is no time or resources to train a neural network, then we can take a sentence as a unit of thought. This is actually not far from the truth. If the sentence is too short, then you can combine several such short sentences together and consider them as a thought.
 
+![Breaking down text into thoughts](diagrams/diagram2.png)
 <p align="center">Diagram 2. Breaking down text into thoughts</p>
 
 ### 2.3.	From Token Embedding to Thought Embedding
@@ -79,6 +81,7 @@ So we have an array of token embeddings. How to understand their meaning, how to
 
 An astute reader will immediately notice that if the dimension of token embeddings is large, but quite finite, because there are not so many words and their meanings, then the dimension of thought embedding will be huge, because there are incomparably more possible thoughts and the dimension of the space of meanings for them will be larger. What should be the size of thought embedding for a large novel of several hundred pages? How can such a huge neural network be trained? I completely agree with this opinion. But we do not need big thoughts. We will combine small sets of tokens into simple thoughts. And just as the number of words is limited, the number of their basic meanings, basic thoughts, will also be limited.
 
+![Transforming token embeddings into thought embeddings](diagrams/diagram3.png)
 <p align="center">Diagram 3. Transforming token embeddings into thought embeddings</p>
 
 ### 2.4.	Convolutional LLM
@@ -86,6 +89,7 @@ To make a thought embedding from an array of token embeddings, a convolutional L
 
 We train encoder and decoder simultaneously. The first transforms a sequence of token embeddings into a single embedding, and the second restores the original token embeddings. The error is calculated from the difference in embeddings at the input of the encoder and at the output of the decoder of the same thought/set of tokens. This differs from token-based LLM training, where the next token is predicted, not the current one. Understanding, encoding of thought should be done by passing text through the bottleneck of the encoder.
 
+![Possible design of a convolutional LLM](diagrams/diagram4.png)
 <p align="center">Diagram 4. Possible design of a convolutional LLM</p>
 
 ### 2.5.	Predicting the Next Thought
@@ -95,6 +99,7 @@ Let's add another layer to the encoder chain. Such an encoder layer will accept 
 
 Let's complicate and expand the task a little. Let's predict the next thought not only by the previous thought, but by several previous ones. Let's introduce the size of the context for thoughts, we also have the size of the context for tokens. And the predictive model will also be made on transformers. The thought window can be either floating and include the last N thoughts or start from a certain place, from the beginning of a chapter or a scientific article. The optimal method for each type of text will need to be determined experimentally.
 
+![Predicting the next thought](diagrams/diagram5.png)
 <p align="center">Diagram 5. Predicting the next thought</p>
 
 ### 2.6.	Thinking model
@@ -102,6 +107,7 @@ So we have a neural network that can predict the next thought based on N previou
 
 A sequential set of embeddings of predicted thoughts performs the function of short-term memory. It is possible to train a neural network so that over time it summarizes the sequence of reasoning, selects the result that it considers correct and ready, and leaves at the input of the predictive model only the initial task, such intermediate conclusions, and the last N thoughts in the full set. This will allow for long and deep reflections without increasing the volume of calculations and saving intermediate results for pausing and then resuming work.
 
+![Thinking model](diagrams/diagram6.png)
 <p align="center">Diagram 6. Thinking model</p>
 
 ### 2.7.	Basic model
@@ -121,7 +127,7 @@ Now, at the beginning of 2025, some advanced models are trained on texts collect
 ### 3.3.	Expert LLMs - specialized models
 Small expert models, slightly different from the basic model in the size of the embedding vector, but having a larger number of layers. The task of these models is to understand, to be an expert in a certain area of human activity. For example, to know some science or combination of sciences, to know certain technologies, production, etc.
 
-### 3.4.	General LLMs  - models for models
+### 3.4.	Common LLMs  - models for models
 These are specialized models, but intended rather for others, primarily expert LLMs, and not for humans. An example of such a model is a computational model that generates code that performs certain calculations, which allows combining, connecting together both thinking and classical computer calculations.
 
 ### 3.5.	Supervisor LLM – management model
@@ -132,6 +138,7 @@ To generate such answers (if necessary), the model calls on the Big and Fresh LL
 ### 3.6.	Scheme of interaction of models
 Tokens from the user are converted into embeddings and fed to the input of Supervisor LLM. The output of Supervisor LLM is converted back into tokens and is the answer to the task. Information exchange between models is performed using token embeddings. For diagnostics and understanding of the thinking process, these embeddings can be converted into tokens, but this is not required for the operation of the models themselves. Perhaps, in the process of training models, a model language based on token embeddings will appear, inheriting them, but which will no longer be convertible into tokens. How to train/learn such interaction of models will be described in the next chapter.
 
+![Interaction of models](diagrams/diagram7.png)
 <p align="center">Diagram 7. Interaction of models</p>
 
 ## 4.	Supervisor LLM
