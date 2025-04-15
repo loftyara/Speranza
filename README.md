@@ -1,5 +1,5 @@
 # Thinking Machine from an engineer's perspective - how to design an LLM that understands and thinks
-*“The mind is not a vessel to be filled, but a flame to be lit” Lucius Mestrius Plutarchus*\
+*“The mind is not a vessel to be filled, but a flame to be lit” Lucius Mestrius Plutarchus*
 
 ## Abstract
 This article presents an engineering perspective on designing a Large Language Model (LLM) capable of genuine understanding and reasoning, rather than merely predicting tokens. The author critiques current LLMs for their limitations, including token-based prediction, lack of explicit thought representation, inability to separate knowledge from facts, absence of short-term memory, and inefficiency in scaling.
